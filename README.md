@@ -59,7 +59,7 @@ It is always a good practice to keep a backup of the GPG key and use a strong pa
 
 Create a master key with Certification capability and then 3 subkeys with these capabilities:  Sign, Encrypt ant Authenticate.
 
-Then for increasing the secutity, the master private key must be stored on a encrypted storage device and deleted from the computer.
+Then for increasing the secutity, the master private key must be stored on an encrypted storage device and deleted from the computer.
 
 The subkeys can also be offloaded to a smart card for going an extra-mile in the GPG keys protection.
 
@@ -94,7 +94,7 @@ EOF
 
 `gpg --batch --generate-key  --enable-large-rsa primary_gpg_key_constructor.tpl`
 
-(`eanble-lage-rsa` is to have a key of size over 4096 bit)
+(`enable-large-rsa` is to have a key of size over 4096 bits)
 
 #### Check your private keys
 
@@ -196,8 +196,7 @@ Then delete the key
 
 In order to protect your master key, you need to remove it from the local computer. Before to do so, you need to securely store the master key on an encrypted external usb device. 
 
-*In the usb drive, create a folder `secret`. *
-*Optionally, set a local versioning with `git init` in this folder.*
+*In the usb drive, create a folder `secret`. Optionally, set a local versioning with `git init` in this folder.*
 
 (The reason to create a local git is to track change on the `secret` folder )
 
