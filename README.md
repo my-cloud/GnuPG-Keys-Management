@@ -1,30 +1,27 @@
-# GnuPG Key Management
-
-GPG is a wonderful tool for encrypting and signing data and authentication.
-Using GPG for years, I noticed the onboarding for new users was never easy.
-
-This repository will go through my understanding of GPG [use cases and best practices](#GnuPG-Key-Description), as well as a [technical walkthrough](./Technical-Walkthrough.md)] to get a nice GPG environment set up.
+## GnuPG in a nutshell
 
 GPG is a powerful tool for encrypting and signing data, as well as for authentication.
-Using GPG for years, I've found that the onboarding process for new users is often difficult. This repository aims to share my understanding of GPG  [use cases and best practices](#GnuPG-Key-Description), as well as provide a  [technical walkthrough](./Technical-Walkthrough.md)] for setting up a safe GPG environment easily.
+Using GPG for years, I've found that the onboarding process for new users is often difficult. 
+
+This repository aims to share my understanding of GPG  [use cases and best practices](#gnupg-key-description), as well as provide a  [technical walkthrough](./Technical-Walkthrough.md) for setting up a safe GPG environment easily.
 
 ---
 
--  **[GnuPG Key Description](./README.md#GnuPG-Key-Description)**
-    - **[Different Uses of GPG Keys](./README.md#Different-Uses-of-GPG-Keys)**
-    - **[Best Practices for Individual GPG Key Management](./README.md#Best-Practices-for-Individual-GPG-Key-Management)**
-    - **[GPG Key Safety on a SmartCard](./README.md#GPG-Key-Safety-on-a-SmartCard)**
+-  **[GnuPG Key Description](./README.md#gnupg-key-description)**
+    - **[Different Uses of GPG Keys](./README.md#different-uses-of-gpg-keys)**
+    - **[Best Practices for Individual GPG Key Management](./README.md#best-practices-for-individual-gpg-key-management)**
+    - **[GPG Key Safety on a SmartCard](./README.md#gpg-key-safety-on-a-smartcard)**
 -  **[GnuPG Key Technical Walkthrough](./Technical-Walkthrough.md)**
-    - **[Create gpg key pair](./Technical-Walkthrough.md#Create-gpg-key-pair)**
-    - **[Create Subkeys](./Technical-Walkthrough.md#Create-Subkeys)**
-    - **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key-Rotation?-Sign-this-new-key)**
-    - **[Protect your master key](./Technical-Walkthrough.md#Protect-your-master-key)**
-    - **[Use the offline master key](./Technical-Walkthrough.md#Use-the-offline-master-key)**
-    - **[Protect your subkeys](./Technical-Walkthrough.md#Protect-your-subkeys)**
-    - **[Test your key](./Technical-Walkthrough.md#Test-your-key)**
-    - **[Import / Re-import](./Technical-Walkthrough.md#Import-/-Re-import)**
-    - **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion-/-Revocation)**
-    - **[References](./Technical-Walkthrough.md#References)**
+    - **[Create gpg key pair](./Technical-Walkthrough.md#create-gpg-key-pair)**
+    - **[Create Subkeys](./Technical-Walkthrough.md#create-subkeys)**
+    - **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#key-rotation-sign-this-new-key)**
+    - **[Protect your master key](./Technical-Walkthrough.md#protect-your-master-key)**
+    - **[Use the offline master key](./Technical-Walkthrough.md#use-the-offline-master-key)**
+    - **[Protect your subkeys](./Technical-Walkthrough.md#protect-your-subkeys)**
+    - **[Test your key](./Technical-Walkthrough.md#test-your-key)**
+    - **[Import / Re-import](./Technical-Walkthrough.md#import--re-import)**
+    - **[Deletion / Revocation](./Technical-Walkthrough.md#deletion--revocation)**
+    - **[References](./Technical-Walkthrough.md#references)**
 
 ---
 

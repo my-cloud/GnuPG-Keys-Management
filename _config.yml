@@ -1,0 +1,16 @@
+remote_theme: pages-themes/midnight@v0.2.0
+plugins:
+- jekyll-remote-theme
+title: [GnuPG Keys Management]
+description: [Personal approach of GnuPG understanding and Keys management walkthrough]
+
+# custom directory to fetch pages from
+include: ["_pages"]
+collections:
+  pages:
+    output: true
+    permalink: "/:path"
+
+# remove dates and prettify links
+permalink: pretty
+

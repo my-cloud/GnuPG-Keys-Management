@@ -1,3 +1,7 @@
+---
+layout: default
+title: "GnuPG Key Technical Walkthrough"
+---
 ## GnuPG Key Technical Walkthrough
 
 Create a master key with Certification capability and then 3 subkeys with these capabilities:  Sign, Encrypt ant Authenticate.
@@ -8,16 +12,16 @@ The subkeys can also be offloaded to a smart card for going an extra-mile in the
 
 ---
 
-- **[Create gpg key pair](./Technical-Walkthrough.md#Create-gpg-key-pair)**
-- **[Create Subkeys](./Technical-Walkthrough.md#Create-Subkeys)**
-- **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key-Rotation?-Sign-this-new-key)**
-- **[Protect your master key](./Technical-Walkthrough.md#Protect-your-master-key)**
-- **[Use the offline master key](./Technical-Walkthrough.md#Use-the-offline-master-key)**
-- **[Protect your subkeys](./Technical-Walkthrough.md#Protect-your-subkeys)**
-- **[Test your key](./Technical-Walkthrough.md#Test-your-key)**
-- **[Import / Re-import](./Technical-Walkthrough.md#Import-/-Re-import)**
-- **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion-/-Revocation)**
-- **[References](./Technical-Walkthrough.md#References)**
+- **[Create gpg key pair](./Technical-Walkthrough.md#create-gpg-key-pair)**
+- **[Create Subkeys](./Technical-Walkthrough.md#create-subkeys)**
+- **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#key-rotation-sign-this-new-key)**
+- **[Protect your master key](./Technical-Walkthrough.md#protect-your-master-key)**
+- **[Use the offline master key](./Technical-Walkthrough.md#use-the-offline-master-key)**
+- **[Protect your subkeys](./Technical-Walkthrough.md#protect-your-subkeys)**
+- **[Test your key](./Technical-Walkthrough.md#test-your-key)**
+- **[Import / Re-import](./Technical-Walkthrough.md#import--re-import)**
+- **[Deletion / Revocation](./Technical-Walkthrough.md#deletion--revocation)**
+- **[References](./Technical-Walkthrough.md#references)**
 
 ---
 
