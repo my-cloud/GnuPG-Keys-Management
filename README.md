@@ -1,8 +1,8 @@
-# GnuPG Keys Managment
-
+# GnuPG Key Management
 
 ## Description
-### Different uses of GPG keys
+
+### Different Uses of GPG Keys
 
 GPG, or GNU Privacy Guard, is a free and open-source implementation of the OpenPGP standard for encrypting and signing data. GPG keys are used for a variety of purposes, including:
 
@@ -12,9 +12,9 @@ GPG, or GNU Privacy Guard, is a free and open-source implementation of the OpenP
 - SSH authentication: GPG keys can be used as an alternative to traditional SSH keys for logging into remote servers.
 - Digital signatures: GPG keys can be used to create digital signatures, which can be used to verify the authenticity of documents or software.
 
-Overall GPG provides a powerful way to secure communication, protect data and identity of sender.
+Overall, GPG provides a powerful way to secure communication, protect data, and establish the identity of the sender.
 
-### Best practices for individual GPG key management
+### Best Practices for Individual GPG Key Management
 
 - Use a strong passphrase to protect your private key.
 - Keep a backup of your private key in a secure location.
@@ -26,31 +26,30 @@ Overall GPG provides a powerful way to secure communication, protect data and id
 - Use a hardware security device, such as a YubiKey, to store your private key and add an extra layer of security.
 - Be aware of phishing attempts and never share your private key with anyone.
 
-
-
-### GPG keys safety on a SmartCard
+### GPG Key Safety on a SmartCard
 
 #### TL;DR
+
 Using a SmartCard to store GPG keys can increase security by adding an additional layer of protection to the keys. The SmartCard can be used to encrypt and decrypt the keys, and can also be used as a hardware token for authenticating to GPG. Additionally, storing the keys on the SmartCard allows them to be easily transported and used on different computers without the need to copy the keys to each machine. However, it is important to properly secure the SmartCard to prevent unauthorized access to the keys.
 
-#### Advantage of moving gpg keys to a OpenPGP SmartCard ( Yubikey or alternative)
-Yubikey is mainly known for its two-factor authentication, but its GPG smart-card functionality makes it very useful for GPG key management.
+#### Advantages of Moving GPG Keys to a OpenPGP SmartCard (YubiKey or Alternative)
 
-There are several advantages to moving GPG keys to a OpenPGP SmartCard:
+YubiKey is mainly known for its two-factor authentication, but its GPG smart-card functionality makes it very useful for GPG key management.
+
+There are several advantages to moving GPG keys to an OpenPGP SmartCard:
 
 - Physical security: Storing GPG keys on a SmartCard provides an additional layer of security by keeping the keys on a physical device that can be locked up and protected from unauthorized access.
 - Portability: With the keys stored on a SmartCard, you can use them on multiple devices without having to transfer them between computers.
 - Convenience: Using a SmartCard for GPG key management makes it easier to perform tasks such as signing and encrypting messages, as the keys are always available on the device.
-- Tamper-proof: Yubikey is tamper-proof, which makes it difficult for an attacker to extract the keys or modify the key material. Furthermore, Yubikey hardware can encrypt and decrypt the key material, which makes it more secure than storing the key on the disk.
+- Tamper-proof: YubiKey is tamper-proof, which makes it difficult for an attacker to extract the keys or modify the key material. Furthermore, YubiKey hardware can encrypt and decrypt the key material, which makes it more secure than storing the key on disk.
 
-
-It is generally considered difficult to extract a GPG key from a Yubikey, as the device is designed to be tamper-resistant and secure. The keys are stored in a secure element inside the Yubikey, which is protected by several layers of hardware and software security.
+It is generally considered difficult to extract a GPG key from a YubiKey, as the device is designed to be tamper-resistant and secure. The keys are stored in a secure element inside the YubiKey, which is protected by several layers of hardware and software security. The keys are encrypted and protected by a PIN, and the secure element includes a built-in tamper-detection mechanism that will wipe the keys if an unauthorized attempt is made to extract them.
 
 The keys are encrypted and protected by a PIN, and the secure element includes a built-in tamper-detection mechanism that will wipe the keys if an unauthorized attempt is made to extract them.
 
-However, it is important to note that no security measure is completely foolproof and that any device can potentially be hacked or compromised if a hacker has enough resources and expertise. Additionally, if the SmartCard is lost or stolen it could be used by an attacker with physical access to the device.
+However, it is important to note that no security measure is completely foolproof, and that any device can potentially be hacked or compromised if a hacker has enough resources and expertise. Additionally, if the SmartCard is lost or stolen, it could be used by an attacker with physical access to the device.
 
-It is always a good practice to keep a backup of the GPG key and use a strong passphrase to protect the key from bruteforce attacks. 
+It is always a good practice to keep a backup of the GPG key and use a strong passphrase to protect the key from brute-force attacks.
 
 ---
 
