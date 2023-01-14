@@ -10,21 +10,21 @@ Using GPG for years, I've found that the onboarding process for new users is oft
 
 ---
 
--  **[GnuPG Key Description](#GnuPG-Key-Description)**
-  - **[Different Uses of GPG Keys](./README.md#Different-Uses-of-GPG-Keys)**
-  - **[Best Practices for Individual GPG Key Management](./README.md#Best-Practices-for-Individual-GPG-Key-Management)**
-  - **[GPG Key Safety on a SmartCard](./README.md#GPG-Key-Safety-on-a-SmartCard)**
+-  **[GnuPG Key Description](./README.md#GnuPG-Key-Description)**
+    - **[Different Uses of GPG Keys](./README.md#Different-Uses-of-GPG-Keys)**
+    - **[Best Practices for Individual GPG Key Management](./README.md#Best-Practices-for-Individual-GPG-Key-Management)**
+    - **[GPG Key Safety on a SmartCard](./README.md#GPG-Key-Safety-on-a-SmartCard)**
 -  **[GnuPG Key Technical Walkthrough](./Technical-Walkthrough.md)**
-  - **[Create gpg key pair](./Technical-Walkthrough.md#Create-gpg-key-pair)**
-  - **[Create Subkeys](./Technical-Walkthrough.md#Create-Subkeys)**
-  - **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key-Rotation?-Sign-this-new-key)**
-  - **[Protect your master key](./Technical-Walkthrough.md#Protect-your-master-key)**
-  - **[Use the offline master key](./Technical-Walkthrough.md#Use-the-offline-master-key)**
-  - **[Protect your subkeys](./Technical-Walkthrough.md#Protect-your-subkeys)**
-  - **[Test your key](./Technical-Walkthrough.md#Test-your-key)**
-  - **[Import / Re-import](./Technical-Walkthrough.md#Import-/-Re-import)**
-  - **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion-/-Revocation)**
-  - **[References](./Technical-Walkthrough.md#References)**
+    - **[Create gpg key pair](./Technical-Walkthrough.md#Create-gpg-key-pair)**
+    - **[Create Subkeys](./Technical-Walkthrough.md#Create-Subkeys)**
+    - **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key-Rotation?-Sign-this-new-key)**
+    - **[Protect your master key](./Technical-Walkthrough.md#Protect-your-master-key)**
+    - **[Use the offline master key](./Technical-Walkthrough.md#Use-the-offline-master-key)**
+    - **[Protect your subkeys](./Technical-Walkthrough.md#Protect-your-subkeys)**
+    - **[Test your key](./Technical-Walkthrough.md#Test-your-key)**
+    - **[Import / Re-import](./Technical-Walkthrough.md#Import-/-Re-import)**
+    - **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion-/-Revocation)**
+    - **[References](./Technical-Walkthrough.md#References)**
 
 ---
 
