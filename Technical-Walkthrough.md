@@ -8,15 +8,15 @@ The subkeys can also be offloaded to a smart card for going an extra-mile in the
 
 ---
 
-- **[Create gpg key pair](./Technical-Walkthrough.md#Create gpg key pair)**
-- **[Create Subkeys](./Technical-Walkthrough.md#Create Subkeys)**
-- **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key Rotation? Sign this new key )**
-- **[Protect your master key](./Technical-Walkthrough.md#Protect your master key)**
-- **[Use the offline master key](./Technical-Walkthrough.md#Use the offline master key)**
-- **[Protect your subkeys](./Technical-Walkthrough.md#Protect your subkeys)**
-- **[Test your key](./Technical-Walkthrough.md#Test your key)**
-- **[Import /  Re-import](./Technical-Walkthrough.md#Import /  Re-import)**
-- **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion / Revocation)**
+- **[Create gpg key pair](./Technical-Walkthrough.md#Create-gpg-key-pair)**
+- **[Create Subkeys](./Technical-Walkthrough.md#Create-Subkeys)**
+- **[Key Rotation? Sign this new key ](./Technical-Walkthrough.md#Key-Rotation?-Sign-this-new-key)**
+- **[Protect your master key](./Technical-Walkthrough.md#Protect-your-master-key)**
+- **[Use the offline master key](./Technical-Walkthrough.md#Use-the-offline-master-key)**
+- **[Protect your subkeys](./Technical-Walkthrough.md#Protect-your-subkeys)**
+- **[Test your key](./Technical-Walkthrough.md#Test-your-key)**
+- **[Import / Re-import](./Technical-Walkthrough.md#Import-/-Re-import)**
+- **[Deletion / Revocation](./Technical-Walkthrough.md#Deletion-/-Revocation)**
 - **[References](./Technical-Walkthrough.md#References)**
 
 ---
@@ -378,7 +378,7 @@ To redirect the output into another file :
 
 ---
 
-### Import /  Re-import
+### Import / Re-import
 
 #### Import someone's public key:
 
