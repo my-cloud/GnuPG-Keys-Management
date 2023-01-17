@@ -1,8 +1,10 @@
     <footer class="footer-distributed">
       <div class="container">
         <div class="footer">
-          <p>{{ site.author }} &copy; {{ site.copyright }}</p>
+          {%if site.social %}
+          <p>{{ site.author }} {%if site.copyright %}&copy; {{ site.copyright }}{% endif %}</p>
           {% include social.html %}
+          {% endif %}
         </div>
       </div>
     </footer>
