@@ -6,13 +6,13 @@ description: [Personal approach of GnuPG understanding and Keys management walkt
 author: "Gwenall Pansier"
 
 
-  #social:
-  #  github: gwenall
-  #  linkedin: gwenall
-  #  twitter: _gwenall
-  #  email: gwenall.pansier+git@my-cloud.me
-  #  gpg: https://keybase.io/gwenall/pgp_keys.asc
-  #  stackoverflow: ''
+social:
+  github: gwenall
+  linkedin: gwenall
+  twitter: _gwenall
+  email: gwenall.pansier+git@my-cloud.me
+  gpg: https://keybase.io/gwenall/pgp_keys.asc
+  stackoverflow: ''
 
 
 # remove dates and prettify links

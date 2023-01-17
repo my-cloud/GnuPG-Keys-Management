@@ -18,6 +18,7 @@
     {% include head-custom.html %}
   </head>
   <body>
+            {% if site.show_header %}
       <div id="header">
         <nav>
           <ul>
@@ -30,6 +31,7 @@
           </ul>
         </nav>
       </div><!-- end header -->
+            {% endif %}
 
     <div class="wrapper">
 
@@ -38,11 +40,13 @@
           <h1>{{ site.title | default: site.github.repository_name }}</h1>
           <p>{{ site.description | default: site.github.project_tagline }}</p>
           <hr>
-          {% if site.author.url %}
-          {% if site.author.name %}
-          <span class="credits left">Authored by <a href="{{ site.author.url }}">{{ site.author.name }}</a></span>
-          <span class="credits right">A <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a> Project</span>
+          {% if site.social.github %}
+          {% if site.author %}
+          <span class="credits left">Authored by <a href="{{ site.social.github }}">{{ site.author }}</a></span>
           {% endif %}
+          {% endif %}
+          {% if site.github %}
+          <span class="credits right">A <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a> Project</span>
           {% endif %}
         </div>
 

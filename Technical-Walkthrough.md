@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: "GnuPG Key Technical Walkthrough"
 ---
 ## GnuPG Key Technical Walkthrough
