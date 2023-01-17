@@ -1,0 +1,16 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+
+a {
+  color:#00ccff;
+  &:hover {
+    color: #00eb9b;
+  }
+}
+
+blockquote {
+  border-left:3px solid #00ccff;
+}
