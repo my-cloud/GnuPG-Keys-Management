@@ -6,7 +6,7 @@ title: "GnuPG Key Technical Walkthrough"
 
 Create a master key with Certification capability and then 3 subkeys with these capabilities:  Sign, Encrypt ant Authenticate.
 
-Then for increasing the secutity, the master private key must be stored on an encrypted storage device and deleted from the computer.
+Then for increasing the security, the master private key must be stored on an encrypted storage device and deleted from the computer.
 
 The subkeys can also be offloaded to a smart card for going an extra-mile in the GPG keys protection.
 
@@ -126,7 +126,7 @@ Then exit gpg nicely by entering `q` then `y`
 
 #### Check all the Subkeys
 
-` gpg --fingerprint --fingerprint E6B0933DD47E3B2F823334F0A567B3B17C27BF6D`
+`gpg --fingerprint --fingerprint E6B0933DD47E3B2F823334F0A567B3B17C27BF6D`
 
 the `--fingerprint` twice is to reveal the subkeys information
 ```
