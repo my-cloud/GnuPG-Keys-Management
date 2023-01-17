@@ -38,9 +38,11 @@
           <h1>{{ site.title | default: site.github.repository_name }}</h1>
           <p>{{ site.description | default: site.github.project_tagline }}</p>
           <hr>
-          {% if site.author %}
+          {% if site.author.url %}
+          {% if site.author.name %}
           <span class="credits left">Authored by <a href="{{ site.author.url }}">{{ site.author.name }}</a></span>
           <span class="credits right">A <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a> Project</span>
+          {% endif %}
           {% endif %}
         </div>
 
