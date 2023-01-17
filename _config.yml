@@ -3,17 +3,17 @@ plugins:
 - jekyll-remote-theme
 title: [GnuPG Keys Management]
 description: [Personal approach of GnuPG understanding and Keys management walkthrough]
-author:
-  name: "Gwenall Pansier"
-  url: https://github.com/gwenall
+author: "Gwenall Pansier"
 
 
-# custom directory to fetch pages from
-include: ["_pages"]
-collections:
-  pages:
-    output: true
-    permalink: "/:path"
+social:
+  github: gwenall
+  linkedin: gwenall
+  twitter: _gwenall
+  email: gwenall.pansier+git@my-cloud.me
+  gpg: https://keybase.io/gwenall/pgp_keys.asc
+  stackoverflow: ''
+
 
 # remove dates and prettify links
 permalink: pretty
