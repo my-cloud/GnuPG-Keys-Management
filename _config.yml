@@ -3,6 +3,10 @@ plugins:
 - jekyll-remote-theme
 title: [GnuPG Keys Management]
 description: [Personal approach of GnuPG understanding and Keys management walkthrough]
+author:
+  name: "Gwenall Pansier"
+  url: https://github.com/gwenall
+
 
 # custom directory to fetch pages from
 include: ["_pages"]

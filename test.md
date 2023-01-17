@@ -1,9 +1,6 @@
 ---
 layout: page
 title: "GnuPG Key Technical Walkthrough"
-author: 
-  name: "Gwenall Pansier"
-  url: https://github.com/gwenall
 ---
 ## test
 
