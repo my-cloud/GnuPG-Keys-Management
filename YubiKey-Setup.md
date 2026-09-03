@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: "YubiKey Setup"
 permalink: /YubiKey-Setup/
 ---
