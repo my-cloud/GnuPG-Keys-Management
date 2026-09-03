@@ -22,6 +22,7 @@ This repository aims to share my understanding of GPG  [use cases and best pract
     - **[Import / Re-import](./Technical-Walkthrough.md#import--re-import)**
     - **[Deletion / Revocation](./Technical-Walkthrough.md#deletion--revocation)**
     - **[References](./Technical-Walkthrough.md#references)**
+-  **[YubiKey Setup](./YubiKey-Setup.md)**
 
 ---
 
@@ -79,4 +80,3 @@ It is always a good practice to keep a backup of the GPG key and use a strong pa
 ---
 
 [Gwenall Pansier](https://github.com/gwenall) - [gwenall.pansier+git@my-cloud.me](mailto:gwenall.pansier+git@my-cloud.me)
-
