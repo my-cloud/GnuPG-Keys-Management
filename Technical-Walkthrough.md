@@ -40,12 +40,14 @@ Name-Real: My Name
 #Name-Comment:
 Name-Email: something@something
 Expire-Date: 0
-Passphrase:  Something
 # Do a commit here, so that we can later print "done" :-)
 %commit
 %echo done
 EOF
 ```
+
+GnuPG asks for the passphrase through pinentry. Do not place a real passphrase
+in the template or command line.
 
 
 
@@ -145,7 +147,7 @@ sub   rsa4096 2023-01-14 [A] [expires: 2030-01-12]
 
 In case it is not your first key and you are doing a key rotation:  you can sign the new master key with your previous key that you're transitioning from.
 
-`gpg --sign-key <longid>`
+`gpg --sign-key <FULL_PRIMARY_KEY_FINGERPRINT>`
 
 ---
 
@@ -161,37 +163,192 @@ In order to protect your master key, you need to remove it from the local comput
 Below are the commands to save the master key:
 
 ```bash
-# Change the values of these variables if needed
-export EXPORT_DIR="<Encrypted_Device_Path>/secrets/gpg"
-export EXPORT_FILENAME="MySelf_Master_MyComment_private_rsa8192"
-export EXPORT_KEY_ID="<GPG_Key_ID>"
-mkdir -p ${EXPORT_DIR}
-gpg --armor --output $EXPORT_DIR/$EXPORT_FILENAME.private-key.sec --export-secret-keys $EXPORT_KEY_ID
-gpg --armor --output $EXPORT_DIR/$EXPORT_FILENAME.subkeys.sec --export-secret-subkeys $EXPORT_KEY_ID
-gpg --armor --output $EXPORT_DIR/$EXPORT_FILENAME.pubkey.asc --export $EXPORT_KEY_ID
-for REASON in no-reasons compromized superseded no-longer-used; do
-echo -e "Select the revocation reason: \e[92m$REASON\e[0m"
-gpg --output $EXPORT_DIR/$EXPORT_FILENAME.revoke.$REASON.asc --gen-revoke $EXPORT_KEY_ID
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+ENCRYPTED_MOUNT="/run/media/user/Encrypted_Device"
+EXPORT_DIR="$ENCRYPTED_MOUNT/secrets/gpg"
+EXPORT_FILENAME="MySelf_Master_MyComment_private_rsa8192"
+EXPORT_FINGERPRINT="<FULL_PRIMARY_KEY_FINGERPRINT>"
+
+# Never create the expected mount path on the unencrypted root filesystem.
+if ! mountpoint -q -- "$ENCRYPTED_MOUNT"; then
+    echo "Encrypted device is not mounted at $ENCRYPTED_MOUNT" >&2
+    exit 1
+fi
+if [[ ! -d "$ENCRYPTED_MOUNT" || ! -w "$ENCRYPTED_MOUNT" ]]; then
+    echo "Encrypted mount is not writable" >&2
+    exit 1
+fi
+
+# This is safe only after the mount check above.
+install -d -m 0700 -- "$EXPORT_DIR"
+
+ARTIFACTS=(
+    "$EXPORT_DIR/$EXPORT_FILENAME.private-key.sec"
+    "$EXPORT_DIR/$EXPORT_FILENAME.subkeys.sec"
+    "$EXPORT_DIR/$EXPORT_FILENAME.pubkey.asc"
+    "$EXPORT_DIR/$EXPORT_FILENAME.keygrip.txt"
+    "$EXPORT_DIR/gnupg-ownertrust.txt"
+    "$EXPORT_DIR/revoke.no-reason.asc"
+    "$EXPORT_DIR/revoke.compromised.asc"
+    "$EXPORT_DIR/revoke.superseded.asc"
+    "$EXPORT_DIR/revoke.no-longer-used.asc"
+)
+for ARTIFACT in "${ARTIFACTS[@]}"; do
+    [[ ! -e "$ARTIFACT" ]] || {
+        echo "Refusing to overwrite $ARTIFACT" >&2
+        exit 1
+    }
 done
-gpg --list-secret-keys --with-keygrip $EXPORT_KEY_ID > $EXPORT_FILENAME.keygrip.txt
-gpg --export-ownertrust > $EXPORT_DIR/pgp-ownertrust.asc
+
+gpg --armor --output "$EXPORT_DIR/$EXPORT_FILENAME.private-key.sec" \
+    --export-secret-keys "$EXPORT_FINGERPRINT"
+gpg --armor --output "$EXPORT_DIR/$EXPORT_FILENAME.subkeys.sec" \
+    --export-secret-subkeys "$EXPORT_FINGERPRINT"
+gpg --armor --output "$EXPORT_DIR/$EXPORT_FILENAME.pubkey.asc" \
+    --export "$EXPORT_FINGERPRINT"
+gpg --list-secret-keys --fingerprint --with-keygrip "$EXPORT_FINGERPRINT" \
+    > "$EXPORT_DIR/$EXPORT_FILENAME.keygrip.txt"
+gpg --export-ownertrust > "$EXPORT_DIR/gnupg-ownertrust.txt"
+
+declare -A REVOCATION_REASONS=(
+    [no-reason]=0
+    [compromised]=1
+    [superseded]=2
+    [no-longer-used]=3
+)
+for REASON in no-reason compromised superseded no-longer-used; do
+    OUTPUT="$EXPORT_DIR/revoke.$REASON.asc"
+    printf '%s\n' y "${REVOCATION_REASONS[$REASON]}" "" y |
+        gpg --no-tty --command-fd 0 --armor --output "$OUTPUT" \
+            --gen-revoke "$EXPORT_FINGERPRINT"
+done
+
+chmod 0600 -- "${ARTIFACTS[@]}"
 ```
 
-*I prefer to generate all possible revocation keys just in case they are needed one day*
-Select 0 (No reason specified)
-Select 1 (Key has been compromised)
-Select 2 (key is superseded)
-Select 3 (key is no longer used)
+Use the **full primary fingerprint**, not a short or long key ID. A fingerprint
+identifies an OpenPGP key; a keygrip is a different identifier used by
+`gpg-agent` for one secret-key component. `mountpoint` confirms that something
+is mounted at the expected path; you must still confirm that it is your unlocked
+encrypted device.
+
+The files have these purposes:
+
+- `private-key.sec`: complete primary-key and subkey disaster recovery.
+- `subkeys.sec`: operational recovery containing secret subkeys only.
+- `pubkey.asc`: convenient standalone public-key export.
+- `keygrip.txt`: diagnostic and reference information.
+- `gnupg-ownertrust.txt`: the local GnuPG ownertrust database.
+
+The old `pgp-ownertrust.asc` name contained the same plain-text data produced by
+`gpg --export-ownertrust`; it was not an ASCII-armored OpenPGP object. Restore
+the renamed file with:
+
+```bash
+gpg --import-ownertrust "$EXPORT_DIR/gnupg-ownertrust.txt"
+```
+
+*I prefer to generate all possible revocation certificates just in case one is
+needed one day.* The automated selection is:
+
+```text
+0 = no reason specified
+1 = key compromised
+2 = key superseded
+3 = key no longer used
+```
+
+Pinentry still asks for the primary-key passphrase securely. Never put that
+passphrase in the script, environment, command line, or shell history. Any one
+of these certificates can revoke the primary key; keeping four only lets you
+choose the appropriate reason later. Protect them with the private backups, and
+never silently overwrite a known-good backup.
+
+GnuPG normally creates `openpgp-revocs.d/<fingerprint>.rev` when it generates a
+primary key. Importing a secret key into a new home does not necessarily recreate
+that file. Do not depend on it during a RAM restore: the explicit certificates
+above are the persistent copies. Also, `$HOME/.gnupg/openpgp-revocs.d/` is wrong
+whenever another `GNUPGHOME` is active. Check the current home with:
+
+```bash
+gpgconf --list-dirs homedir
+```
+
+Before deleting anything, test the complete backup in an isolated RAM keyring:
+
+```bash
+set -euo pipefail
+umask 077
+
+EXPORT_DIR="/run/media/user/Encrypted_Device/secrets/gpg"
+EXPORT_FILENAME="MySelf_Master_MyComment_private_rsa8192"
+EXPORT_FINGERPRINT="<FULL_PRIMARY_KEY_FINGERPRINT>"
+TEST_GNUPGHOME="$(mktemp -d /dev/shm/gnupg-test.XXXXXX)"
+chmod 0700 "$TEST_GNUPGHOME"
+
+cleanup_test_gnupghome() {
+    if [[ -d "$TEST_GNUPGHOME" && ! -L "$TEST_GNUPGHOME" &&
+          "$TEST_GNUPGHOME" == /dev/shm/gnupg-test.* ]]; then
+        gpgconf --homedir "$TEST_GNUPGHOME" --kill all || true
+        rm -rf -- "$TEST_GNUPGHOME"
+        unset TEST_GNUPGHOME
+    else
+        echo "Refusing to delete suspicious TEST_GNUPGHOME" >&2
+        return 1
+    fi
+}
+trap cleanup_test_gnupghome EXIT
+
+gpg --homedir "$TEST_GNUPGHOME" \
+    --import "$EXPORT_DIR/$EXPORT_FILENAME.private-key.sec"
+SECRET_LIST="$(gpg --homedir "$TEST_GNUPGHOME" \
+    --list-secret-keys --fingerprint --with-keygrip "$EXPORT_FINGERPRINT")"
+printf '%s\n' "$SECRET_LIST"
+
+PRIMARY_STATUS="$(awk '/^sec/{print $1; exit}' <<< "$SECRET_LIST")"
+SUBKEY_COUNT="$(awk '$1 == "ssb" {count++} END {print count + 0}' \
+    <<< "$SECRET_LIST")"
+VALID=0
+[[ "$PRIMARY_STATUS" == sec && "$SUBKEY_COUNT" -ge 3 ]] || VALID=1
+
+cleanup_test_gnupghome
+trap - EXIT
+
+(( VALID == 0 )) || {
+    echo "Backup test failed: expected sec and at least three usable ssb entries" >&2
+    exit 1
+}
+```
+
+The test keyring must show `sec`, not `sec#`, and actual `ssb` entries for the
+S/E/A subkeys. A successful export command by itself is not sufficient: exports
+made after keys became unavailable or were diverted to a smartcard can contain
+stubs. For diagnosis, `gpg --list-packets` distinguishes actual protected secret
+material from `gnu-dummy S2K` and `gnu-divert-to-card S2K` representations.
 
 ##### Master key deletion
 
 To increase the security, it is advised to remove the main key, and to only use the subkeys.
 
-list the keygrip
+Only continue after the independent backup test above succeeds. The preferred
+modern command deletes only the primary secret component:
+
+```bash
+gpg --delete-secret-keys "${EXPORT_FINGERPRINT}!"
+gpg --list-secret-keys "$EXPORT_FINGERPRINT"
+```
+
+The quoted `!` forces selection of exactly the primary key. Without it, deleting
+the primary secret key can also delete its secret subkeys.
+
+For the lower-level `gpg-connect-agent` alternative, first list the keygrips:
 
 ```
-gpg --list-secret-keys --with-keygrip
-/home/user/.gnupg/pubring.kbx
+gpg --list-secret-keys --with-keygrip "$EXPORT_FINGERPRINT"
+<active GNUPGHOME>/pubring.kbx
 ------------------------
 sec   rsa8192 2023-01-14 [C]
       E6B0933DD47E3B2F823334F0A567B3B17C27BF6D
@@ -208,10 +365,11 @@ ssb   rsa4096 2023-01-14 [A] [expires: 2030-01-12]
 
 
 
-Then you can remove the Master private key (specifying the keygrip id to delete)
+`DELETE_KEY` expects the keygrip printed under the primary `sec` entry. It does
+**not** accept a GPG key ID, long key ID, or OpenPGP fingerprint:
 
 ```
-gpg-connect-agent "DELETE_KEY A40B888D1142C025A373D11876449440F29A7733" /bye
+gpg-connect-agent "DELETE_KEY <PRIMARY_SEC_KEYGRIP>" /bye
 ```
 
 
@@ -219,8 +377,8 @@ gpg-connect-agent "DELETE_KEY A40B888D1142C025A373D11876449440F29A7733" /bye
 Ensure that the private master key has been removed
 
 ```
-gpg2 --list-secret-keys
-/home/user/.gnupg/pubring.kbx
+gpg --list-secret-keys "$EXPORT_FINGERPRINT"
+<active GNUPGHOME>/pubring.kbx
 ------------------------------
 sec#  rsa8192 2023-01-14 [C]
       E6B0933DD47E3B2F823334F0A567B3B17C27BF6D
@@ -232,63 +390,181 @@ ssb   rsa4096 2023-01-14 [A] [expires: 2030-01-12]
 
 
 
-you should see the `#` symbol after the sec keyword, confirming that the private master key is not usable.
+You should see the `#` symbol after `sec`, confirming that the private primary
+key is not usable. If the subkeys are on a YubiKey, the expected result is
+`sec#` followed by three `ssb>` entries instead of the local `ssb` entries shown
+above.
 
 
 ### Use the offline master key
 
+Use a RAM-backed temporary `GNUPGHOME`, not `~/gpgtmp`. Keep it isolated from
+the normal workstation keyring; in particular, do not point `--keyring` at the
+normal `pubring.kbx`.
 
+```bash
+ENCRYPTED_MOUNT="/run/media/user/Encrypted_Device"
+EXPORT_DIR="$ENCRYPTED_MOUNT/secrets/gpg"
+EXPORT_FILENAME="MySelf_Master_MyComment_private_rsa8192"
+EXPORT_FINGERPRINT="<FULL_PRIMARY_KEY_FINGERPRINT>"
 
+mountpoint -q -- "$ENCRYPTED_MOUNT" || {
+    echo "Encrypted device is not mounted" >&2
+    exit 1
+}
+
+ORIGINAL_GNUPGHOME_SET="${GNUPGHOME+x}"
+ORIGINAL_GNUPGHOME="${GNUPGHOME-}"
+NORMAL_GNUPGHOME="$(gpgconf --list-dirs homedir)"
+
+GNUPGHOME="$(mktemp -d /dev/shm/gnupg.XXXXXX)"
+export GNUPGHOME
+chmod 0700 "$GNUPGHOME"
+
+gpg --import "$EXPORT_DIR/$EXPORT_FILENAME.private-key.sec"
+gpg --import-ownertrust "$EXPORT_DIR/gnupg-ownertrust.txt"
+gpg --list-secret-keys --fingerprint --with-keygrip "$EXPORT_FINGERPRINT"
 ```
-mkdir -p ~/gpgtmp
-chmod 0700 ~/gpgtmp
-gpg --homedir ~/gpgtmp --import <Encrypted_Device_Path>/secrets/gpg/MySelf_Master_MyComment_private_rsa8192.private-key.sec
-gpg --homedir ~/gpgtmp --keyring ~/.gnupg/pubring.kbx --edit-key something@something
+
+The indicators have precise meanings:
+
+```text
+sec    actual primary secret key available
+sec#   primary secret key unavailable/offline
+ssb    actual secret subkey locally available
+ssb#   secret subkey unavailable
+ssb>   secret subkey located on a smartcard/YubiKey
+```
+
+This restored keyring must show `sec`, not `sec#`. A complete backup should also
+show actual `ssb` entries for the S/E/A subkeys. The imported backup contains its
+own public certificate, so sharing the normal workstation's `pubring.kbx` is
+neither necessary nor desirable.
+
+```bash
+gpg --edit-key "$EXPORT_FINGERPRINT"
 ```
 
 You can now perform any operations you need to do with your master key
 
-Then kill the agent to set this master key offline again.
+Changes made here do not modify the encrypted `.private-key.sec` backup. After
+changing a passphrase, expiration, subkey, identity, or certification, create a
+new candidate without overwriting the known-good backup:
 
+```bash
+NEW_BACKUP="$EXPORT_DIR/$EXPORT_FILENAME.private-key.NEW.sec"
+[[ ! -e "$NEW_BACKUP" ]] || {
+    echo "Refusing to overwrite $NEW_BACKUP" >&2
+    exit 1
+}
+gpg --armor --output "$NEW_BACKUP" \
+    --export-secret-keys "$EXPORT_FINGERPRINT"
+chmod 0600 "$NEW_BACKUP"
 ```
-gpg-connect-agent --homedir ~/gpgtmp KILLAGENT /bye
-rm -rf ~/gpgtmp
+
+Test the candidate in another isolated RAM keyring:
+
+```bash
+NEW_TEST_GNUPGHOME="$(mktemp -d /dev/shm/gnupg-test.XXXXXX)"
+chmod 0700 "$NEW_TEST_GNUPGHOME"
+gpg --homedir "$NEW_TEST_GNUPGHOME" --import "$NEW_BACKUP"
+NEW_SECRET_LIST="$(gpg --homedir "$NEW_TEST_GNUPGHOME" \
+    --list-secret-keys --fingerprint --with-keygrip "$EXPORT_FINGERPRINT")"
+printf '%s\n' "$NEW_SECRET_LIST"
+
+NEW_PRIMARY_STATUS="$(awk '/^sec/{print $1; exit}' <<< "$NEW_SECRET_LIST")"
+NEW_SUBKEY_COUNT="$(awk '$1 == "ssb" {count++} END {print count + 0}' \
+    <<< "$NEW_SECRET_LIST")"
+
+if [[ -d "$NEW_TEST_GNUPGHOME" && ! -L "$NEW_TEST_GNUPGHOME" &&
+      "$NEW_TEST_GNUPGHOME" == /dev/shm/gnupg-test.* ]]; then
+    gpgconf --homedir "$NEW_TEST_GNUPGHOME" --kill all || true
+    rm -rf -- "$NEW_TEST_GNUPGHOME"
+    unset NEW_TEST_GNUPGHOME
+else
+    echo "Refusing to delete suspicious NEW_TEST_GNUPGHOME" >&2
+    exit 1
+fi
+
+[[ "$NEW_PRIMARY_STATUS" == sec && "$NEW_SUBKEY_COUNT" -ge 3 ]] || {
+    echo "New backup failed validation; keep the known-good backup" >&2
+    exit 1
+}
+```
+
+Only after that test succeeds, preserve the old copy and atomically promote the
+candidate on the same encrypted filesystem:
+
+```bash
+KNOWN_GOOD="$EXPORT_DIR/$EXPORT_FILENAME.private-key.sec"
+ARCHIVE="$KNOWN_GOOD.previous.$(date -u +%Y%m%dT%H%M%SZ)"
+[[ -f "$KNOWN_GOOD" && ! -e "$ARCHIVE" ]] || exit 1
+cp --preserve=mode,timestamps -- "$KNOWN_GOOD" "$ARCHIVE"
+mv -- "$NEW_BACKUP" "$KNOWN_GOOD"
+chmod 0600 -- "$KNOWN_GOOD" "$ARCHIVE"
+```
+
+Keep the archived backup. If public identities or subkeys changed, refresh the
+public and subkeys-only exports using the same new-file, validate, and preserve
+approach.
+
+Then kill the agent and remove the temporary home to set the master key offline
+again. The path guard is mandatory:
+
+```bash
+if [[ -n "${GNUPGHOME:-}" && -d "$GNUPGHOME" && ! -L "$GNUPGHOME" &&
+      "$GNUPGHOME" == /dev/shm/gnupg.* ]]; then
+    gpgconf --homedir "$GNUPGHOME" --kill all || true
+    rm -rf -- "$GNUPGHOME"
+    unset GNUPGHOME
+else
+    echo "Refusing to delete suspicious GNUPGHOME" >&2
+    exit 1
+fi
+
+if [[ "$ORIGINAL_GNUPGHOME_SET" == x ]]; then
+    export GNUPGHOME="$ORIGINAL_GNUPGHOME"
+fi
+CURRENT_GNUPGHOME="$(gpgconf --list-dirs homedir)"
+printf '%s\n' "$CURRENT_GNUPGHOME"
+[[ "$CURRENT_GNUPGHOME" == "$NORMAL_GNUPGHOME" ]] || {
+    echo "The original GnuPG home was not restored" >&2
+    exit 1
+}
+```
+
+The last command must show the original normal GnuPG home. Verify once more in
+that normal home that the primary is `sec#`; YubiKey-backed subkeys appear as
+`ssb>`.
+
+```text
+Encrypted offline storage
+├── complete primary + subkeys secret backup
+├── subkeys-only backup, public key, revocations, keygrips, ownertrust
+│          │ temporary restore
+│          ▼
+│   RAM-backed GNUPGHOME: sec [C], ssb [S/E/A]
+│          │ maintenance, re-export, independent validation
+│          ▼
+└── destroy RAM GNUPGHOME
+
+Normal workstation: sec# [C], with operational ssb or YubiKey-backed ssb>
 ```
 
 ---
 
 ### Protect your subkeys
 
-You don't want any of your keys on your computer ? Dear paranoid friend, I hear you! 
+You don't want any of your keys on your computer ? Dear paranoid friend, I hear you!
 OpenPGP smartcards is one good approach.
 
 Here are the steps for a Yubikey smartcard:
 
-**Change the PINs on your Yubikey.** The default PIN of your Yubikey is  `12345678`.
+Before moving any subkey, follow the dedicated [YubiKey Setup](./YubiKey-Setup.md)
+page. It covers inspection, OpenPGP and PIV credentials, retry counters, touch
+policies, and firmware compatibility without resetting the device.
 
-```
-$ gpg2 --card-edit
-gpg/card> admin
-Admin commands are allowed
-
-gpg/card> passwd
-1 - change PIN
-2 - unblock PIN
-3 - change Admin PIN
-4 - set the Reset Code
-Q - quit
-
-Your selection?
-```
-
-Then you can start to setup the informations of your YubiKey.
-the `help` command is your friend, but here are the things I would set:
-
-- `login`
-- `lang`
-- `url`
-
-Then move your subkeys to the smartcard:
+Once this setup is complete, move your subkeys to the smartcard:
 
 ````
 gpg --edit-key E6B0933DD47E3B2F823334F0A567B3B17C27BF6D
@@ -310,6 +586,16 @@ remember to **unselect** your current subkey before selecting a new one by enter
 Perform the same operation to move the other keys to your smartcard.
 then `save	`
 
+Writing a subkey can reset that slot's touch policy. Reapply and verify the
+policies after all three `keytocard` operations:
+
+```bash
+ykman openpgp keys set-touch sig on
+ykman openpgp keys set-touch dec on
+ykman openpgp keys set-touch aut on
+ykman openpgp info
+```
+
 Here is what the result should be:
 
 ```
@@ -328,7 +614,7 @@ Login data .......: Something
 Signature PIN ....: forced
 Key attributes ...: rsa4096 rsa4096 rsa4096
 Max. PIN lengths .: 127 127 127
-PIN retry counter : 3 3 3
+PIN retry counter : 12 3 6
 Signature counter : 144
 Signature key ....: 61DF 146E F7F6 0971 5E60  46B8 8C75 87C8 6EAC 2F2F
       created ....: 2020-01-12 10:09:27
@@ -396,11 +682,23 @@ The `pgp-public-keys.asc` is the key name of that person.
 
 in case you ever need to reimport your keys:
 
+```bash
+EXPORT_DIR="/run/media/user/Encrypted_Device/secrets/gpg"
+EXPORT_FILENAME="MySelf_Master_MyComment_private_rsa8192"
+EXPORT_FINGERPRINT="<FULL_PRIMARY_KEY_FINGERPRINT>"
+
+gpg --import "$EXPORT_DIR/$EXPORT_FILENAME.pubkey.asc"
+gpg --import "$EXPORT_DIR/$EXPORT_FILENAME.subkeys.sec"
+gpg --import-ownertrust "$EXPORT_DIR/gnupg-ownertrust.txt"
+gpg --list-secret-keys "$EXPORT_FINGERPRINT"
 ```
-gpg --import pgp-public-keys.asc
-gpg --import pgp-private-keys.asc
-gpg --import-ownertrust pgp-ownertrust.asc
-```
+
+This is the normal workstation import: the primary should remain `sec#`, while
+the operational subkeys appear as `ssb` locally or `ssb>` on a YubiKey. Import
+the complete `private-key.sec` only for disaster recovery or into the isolated
+RAM `GNUPGHOME` described in [Use the offline master key](#use-the-offline-master-key).
+Importing it into the normal home deliberately brings the primary secret key
+back online.
 
 ---
 
@@ -411,7 +709,7 @@ gpg --import-ownertrust pgp-ownertrust.asc
 Something went wrong at the creation, you can delete a subkey? 
 Edit your key 
 
-`gpg2 --expert --edit-key E6B0933DD47E3B2F823334F0A567B3B17C27BF6D`
+`gpg --expert --edit-key E6B0933DD47E3B2F823334F0A567B3B17C27BF6D`
 
 select the `subkey` or `user ID` (depending on what went wrong)
 
@@ -429,13 +727,19 @@ Then delete the key
 
 ##### secret key
 
-`gpg--delete-secret-keys BF62354455FWE53355`
+```bash
+gpg --list-secret-keys --fingerprint "<FULL_PRIMARY_KEY_FINGERPRINT>"
+gpg --delete-secret-keys "<FULL_PRIMARY_KEY_FINGERPRINT>"
+```
 
 (This will also delete all subkeys associated with this secret key)
 
 ##### public key
 
-`gpg--delete-keys BFE88984533WETT2233`
+```bash
+gpg --fingerprint "<FULL_PRIMARY_KEY_FINGERPRINT>"
+gpg --delete-keys "<FULL_PRIMARY_KEY_FINGERPRINT>"
+```
 
 #### Revocation
 
@@ -466,4 +770,3 @@ https://www.devdungeon.com/content/gpg-tutorial
 https://8gwifi.org/docs/gpg.jsp
 
 Yubikey : https://www.youtube.com/watch?v=xGsixSh6sC4
-
